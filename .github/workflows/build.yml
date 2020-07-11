@@ -1,6 +1,8 @@
 name: CRuby Dev Builds
 on:
   push:
+    branches:
+      - '*'
     tags:
     - '*'
   schedule:

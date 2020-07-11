@@ -1,6 +1,8 @@
 name: CRuby Dev Builds
 on:
   push:
+    branches:
+      - '*'
     tags:
     - '*'
   schedule:
@@ -98,7 +100,9 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
     - run: ./configure --prefix=$HOME/.rubies/ruby-${{ matrix.name }} --enable-shared --disable-install-doc --with-openssl-dir=$(brew --prefix openssl@1.1) --with-readline-dir=$(brew --prefix readline)
       if: matrix.os == 'macos-latest'
+
     - run: make -j4
+    - run: make prepare-gems
     - run: make install
 
     - name: Create archive
@@ -106,24 +110,17 @@ jobs:
 
     # Test
     - run: echo "::add-path::$HOME/.rubies/ruby-${{ matrix.name }}/bin"
-    - uses: actions/checkout@v2
-      with:
-        path: test_files
-    - run: mv test_files/Gemfile .
     - run: ruby --version
     - run: ruby -e 'pp RbConfig::CONFIG'
     - run: gem --version
     - run: rake --version
     - run: ruby -ropen-uri -e 'puts open("https://rubygems.org/") { |f| f.read(1024) }'
-    - run: gem install json:2.2.0 --no-document
     - run: bundle --version
-    - run: bundle install
-    - run: bundle exec rake --version
     - name: Subprocess test
       run: ruby -e 'p RbConfig::CONFIG["cppflags"]; def Warning.warn(s); raise s; end; system RbConfig.ruby, "-e", "p :OK"'
 
     - run: make test-spec MSPECOPT=-j
-    - run: make test-all TESTS="-j8"
+    - run: make test-all TESTS="-j4"
 
     - name: Upload Built Ruby
       uses: actions/upload-release-asset@v1

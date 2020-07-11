@@ -110,19 +110,12 @@ jobs:
 
     # Test
     - run: echo "::add-path::$HOME/.rubies/ruby-${{ matrix.name }}/bin"
-    - uses: actions/checkout@v2
-      with:
-        path: test_files
-    - run: mv test_files/Gemfile .
     - run: ruby --version
     - run: ruby -e 'pp RbConfig::CONFIG'
     - run: gem --version
     - run: rake --version
     - run: ruby -ropen-uri -e 'puts open("https://rubygems.org/") { |f| f.read(1024) }'
-    - run: gem install json:2.2.0 --no-document
     - run: bundle --version
-    - run: bundle install
-    - run: bundle exec rake --version
     - name: Subprocess test
       run: ruby -e 'p RbConfig::CONFIG["cppflags"]; def Warning.warn(s); raise s; end; system RbConfig.ruby, "-e", "p :OK"'
 
